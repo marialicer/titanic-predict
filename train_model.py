@@ -37,4 +37,4 @@ model.fit(X_train, y_train)
 joblib.dump(model, "model/titanic_model.pkl")
 
 print("Modelo treinado e salvo!")
-#%%
+# %%
