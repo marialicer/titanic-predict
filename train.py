@@ -9,6 +9,9 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.metrics import roc_curve, roc_auc_score
 from sklearn.tree import plot_tree
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
 #%%
 
 df = pd.read_csv("data/Titanic-Dataset.csv")
@@ -107,3 +110,82 @@ plt.xticks(rotation=45)
 
 plt.show()
 # %%
+scores = cross_val_score(model, X, y, cv=5)
+
+print(scores.mean())
+# %%
+param_grid = {
+    'max_depth': [3,5,7,10],
+    'min_samples_split': [2,5,10]
+}
+# %%
+grid = GridSearchCV(
+    DecisionTreeClassifier(),
+    param_grid,
+    cv=5
+)
+# %%
+grid.fit(X_train, y_train)
+# %%
+print(grid.best_params_)
+# %%
+best_model = grid.best_estimator_
+# %%
+y_pred = best_model.predict(X_test)
+# %%
+y_pred_old = model.predict(X_test)
+y_prob_old = model.predict_proba(X_test)[:,1]
+# %%
+y_pred_new = best_model.predict(X_test)
+y_prob_new = best_model.predict_proba(X_test)[:,1]
+# %%
+acc_old = accuracy_score(y_test, y_pred_old)
+acc_new = accuracy_score(y_test, y_pred_new)
+# %%
+auc_old = roc_auc_score(y_test, y_prob_old)
+auc_new = roc_auc_score(y_test, y_prob_new)
+# %%
+print("Modelo original")
+print("Accuracy:", acc_old)
+print("AUC:", auc_old)
+
+print("\nModelo otimizado (GridSearch)")
+print("Accuracy:", acc_new)
+print("AUC:", auc_new)
+# %%
+fpr_old, tpr_old, _ = roc_curve(y_test, y_prob_old)
+fpr_new, tpr_new, _ = roc_curve(y_test, y_prob_new)
+
+plt.figure()
+
+plt.plot(fpr_old, tpr_old, label="Modelo original")
+plt.plot(fpr_new, tpr_new, label="Modelo GridSearch")
+
+plt.plot([0,1], [0,1], linestyle="--")
+
+plt.xlabel("False Positive Rate")
+plt.ylabel("True Positive Rate")
+plt.title("ROC Curve Comparison")
+plt.legend()
+# %%
+## Testar novos modelos, nesse caso o de RandomForest
+from sklearn.ensemble import RandomForestClassifier
+# %%
+## Criação do modelo de Random Forest
+rf_model = RandomForestClassifier(random_state=42)
+# %%
+#Treinamento do modelo
+rf_model.fit(X_train, y_train)
+# %%
+#Fazer previsões com Random Forest
+y_pred_rf = rf_model.predict(X_test)
+y_prob_rf = rf_model.predict_proba(X_test)[:,1]
+# %%
+## Calcular métricas do modelo Random Forest
+acc_rf = accuracy_score(y_test, y_pred_rf)
+auc_rf = roc_auc_score(y_test, y_prob_rf)
+
+print("Random Forest Accuracy:", acc_rf)
+print("Random Forest AUC:", auc_rf)
+# %%
+## Ver importância das variáveis no Random Forest
