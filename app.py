@@ -3,7 +3,7 @@ import streamlit as st
 import joblib
 import pandas as pd
 
-model = joblib.load("titanic_model.pkl")
+model = joblib.load("model/titanic_model.pkl")
 
 st.title("Você sobreveviria ao Titanic? Responda e Descubra!")
 
